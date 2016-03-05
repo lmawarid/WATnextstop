@@ -8,11 +8,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
+    private Marker start;
+    private Marker end;
+    boolean startlastupdated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +41,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        mMap.getMyLocation();
+        try {
+            mMap.setMyLocationEnabled(true);
+        }
+        catch (SecurityException se){
+            System.out.println("Permission problems for getting location");
+        }
+        mMap.setOnMapClickListener(this);
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        //LatLng sydney = new LatLng(-34, 151);
+        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
+    public void onMapClick(LatLng point){
+        if(startlastupdated){ //update the end pin
+            start.remove();
+            start = mMap.addMarker(new MarkerOptions().position(point).title("Start").draggable(true));
+        }
+        else{ //update the start pin
+            end.remove();
+            end = mMap.addMarker(new MarkerOptions().position(point).title("Destination").draggable(true));
+        }
+        startlastupdated  = !startlastupdated;
+    }
+
 }
