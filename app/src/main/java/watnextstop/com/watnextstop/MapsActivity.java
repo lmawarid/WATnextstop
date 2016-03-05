@@ -28,10 +28,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import watnextstop.com.watnextstop.LocationStuff;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private GoogleMap mMap;
     private Marker destination;
-    private LatLng currentLocation = new LatLng(43.4732258, -80.5436222);
+    private LatLng currentLocation = new LatLng(43.4732258, -80.5436222); //defaults to M3
     //whether the end value have been initialized
     private boolean destination_init = false;
     @Override
@@ -42,17 +44,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        //mapFragment.getMapAsync(this);
-        //43.4667, 80.5167, 43.4500, 80.4833
+        mapFragment.getMapAsync(this);
 
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        String key = getResources().getString(R.string.google_maps_key);
-        try {
-            JSONObject json = new JSONObject();
-            json = LocationStuff.getDirections(43.4667, 80.5167, 43.4500, 80.4833,key);}
-        catch (MalformedURLException e) {}
-        catch (IOException i) {}
+
     }
 
     /**
@@ -98,7 +92,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             destination_init = true;
 
             //get the directions - open new activity, then go back
-
+        System.out.println("Getting directions");
+        System.out.println("# of transfers: " + doDirections());
     }
+    public int doDirections(){
 
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        //this is the server key - not the android api key
+        String key = "AIzaSyCJ_13eGsrcohQfZSdkCh0e92Cm7-c84Y8"; //todo: consider not hardcoding api keys in open-source code
+        try {
+            JSONObject json = new JSONObject();
+            json = LocationStuff.getDirections(currentLocation.latitude, currentLocation.longitude,
+                    destination.getPosition().latitude, destination.getPosition().longitude,key);
+            System.out.println("got json");
+            return LocationStuff.getTransfers(json);
+        }
+        catch (Exception e) {System.out.println(e.getMessage());}
+        finally {
+            return -1;
+        }
+    }
 }

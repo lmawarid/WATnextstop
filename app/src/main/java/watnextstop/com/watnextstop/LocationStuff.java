@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,24 +57,21 @@ public class LocationStuff {
             HttpResponse response;
             stringBuilder = new StringBuilder();*/
 
-        String urlstring = "http://maps.googleapis.com/maps/api/directions/json?origin=" + lat1 + "," + lng1 + "&destination=" + lat2 + "," + lng2 + "&mode=transit&sensor=false" + "&key=" + key;
+        String urlstring = "https://maps.googleapis.com/maps/api/directions/json?origin=" + lat1 + "," + lng1 + "&destination=" + lat2 + "," + lng2 + "&mode=transit&sensor=false" + "&key=" + key;
         URL url = new URL(urlstring);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        StringBuilder result;
+        URLConnection urlConnection = url.openConnection();
+        StringBuilder result = new StringBuilder("");
         try {
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                InputStream in = urlConnection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 result = new StringBuilder();
                 String line;
                 while((line = reader.readLine()) != null) {
                     result.append(line);
-                }}
-                finally {
-                    urlConnection.disconnect();
                 }
-
-
-
+                reader.close();
+        }
+        catch (Exception e){System.out.println(e.getMessage());}
             /*response = client.execute(httppost);
             HttpEntity entity = response.getEntity();
             InputStream stream = entity.getContent();
@@ -93,7 +91,7 @@ public class LocationStuff {
         return (jsonObject);
     }
 
-    public static int getTransfers(JSONObject json)throws JSONException{
+    public static int getTransfers(JSONObject json) throws JSONException{
         JSONArray array = json.getJSONArray("routes");
         JSONObject routes = array.getJSONObject(0);
         JSONArray legs = routes.getJSONArray("legs");
